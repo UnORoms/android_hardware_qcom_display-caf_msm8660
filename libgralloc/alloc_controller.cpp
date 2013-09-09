@@ -196,7 +196,9 @@ int IonController::allocate(alloc_data& data, int usage)
 {
     int ionFlags = 0;
     int ret;
+#ifndef SECURE_MM_HEAP
     bool nonContig = false;
+#endif
 
     data.uncached = useUncached(usage);
     data.allocType = 0;
@@ -206,13 +208,17 @@ int IonController::allocate(alloc_data& data, int usage)
 
     if(usage & GRALLOC_USAGE_PRIVATE_SYSTEM_HEAP) {
         ionFlags |= ION_HEAP(ION_SYSTEM_HEAP_ID);
+#ifndef SECURE_MM_HEAP
         nonContig = true;
+#endif
     }
 
 #ifndef NO_IOMMU
     if(usage & GRALLOC_USAGE_PRIVATE_IOMMU_HEAP) {
         ionFlags |= ION_HEAP(ION_IOMMU_HEAP_ID);
+#ifndef SECURE_MM_HEAP
         nonContig = true;
+#endif
     }
 #endif
 
@@ -278,7 +284,9 @@ int IonController::allocate(alloc_data& data, int usage)
     {
         ALOGW("Falling back to system heap");
         data.flags = ION_HEAP(ION_SYSTEM_HEAP_ID);
+#ifndef SECURE_MM_HEAP
         nonContig = true;
+#endif
         ret = mIonAlloc->alloc_buffer(data);
     }
 
